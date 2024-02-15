@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Line Notify 推播表單</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+    .container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="password"],
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    .form-group button {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .form-group button:hover {
+        background-color: #0056b3;
+    }
+    .hidden {
+        display: none;
+    }
+</style>
+</head>
+<body>
+
+<div class="container" id="loginForm">
+    <h2>登入</h2>
+    <div class="form-group">
+        <label for="email">Email：</label>
+        <input type="email" id="email" name="email" placeholder="請輸入Email">
+    </div>
+    <div class="form-group">
+        <label for="password">密碼：</label>
+        <input type="password" id="password" name="password" placeholder="請輸入密碼">
+    </div>
+    <div class="form-group">
+        <button onclick="login()">登入</button>
+    </div>
+</div>
+
+<div class="container hidden" id="notifyForm">
+    <h2>Line Notify 推播表單</h2>
+    <div class="form-group">
+        <label for="sender">發送人：</label>
+        <input type="text" id="sender" name="sender" placeholder="請輸入發送人名稱">
+    </div>
+    <div class="form-group">
+        <label for="message">訊息：</label>
+        <textarea id="message" name="message" rows="4" placeholder="請輸入訊息內容"></textarea>
+    </div>
+    <div class="form-group">
+        <button onclick="sendLineNotify()">送出</button>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth.js"></script>
+<script>
+// Firebase 設定
+var firebaseConfig = {
+    apiKey: "AIzaSyD08rT64fv1HuqMOjjt7LIHtcFKbjNuYws",
+    authDomain: "login-374fb.firebaseapp.com",
+    projectId: "login-374fb",
+    storageBucket: "login-374fb.appspot.com",
+    messagingSenderId: "206371143556",
+    appId: "1:206371143556:web:0ce7151d090b3df6d5a7d1"
+};
+
+// 初始化 Firebase
+firebase.initializeApp(firebaseConfig);
+
+function login() {
+    var email = document.getElementById("email").value;
+    var password = document.getElementById("password").value;
+
+    // Firebase Email/密碼登入
+    firebase.auth().signInWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+        // 登入成功後顯示推播表單
+        document.getElementById("loginForm").classList.add("hidden");
+        document.getElementById("notifyForm").classList.remove("hidden");
+    })
+    .catch((error) => {
+        alert("登入失敗：" + error.message);
+    });
+}
+
+function sendLineNotify() {
+    var sender = document.getElementById("sender").value;
+    var message = document.getElementById("message").value;
+
+    // 檢查是否有輸入發送人和訊息
+    if (sender.trim() === "" || message.trim() === "") {
+        alert("請填寫發送人和訊息");
+        return;
+    }
+
+    // 使用 Line Notify 的 API 發送訊息
+    var url = "https://notify-api.line.me/api/notify";
+    var token = "zw31iyvsBJyjivHjWelIF5Y6D1fEpG0tjHLUQaerw0F"; // 請替換為您的 Line Notify 權杖
+    var formData = new FormData();
+    formData.append("message", sender + "：" + message);
+
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + token
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("發送失敗");
+        }
+        alert("訊息已成功發送");
+    })
+    .catch(error => {
+        alert("發送失敗：" + error.message);
+    });
+}
+</script>
+
+</body>
+</html>
